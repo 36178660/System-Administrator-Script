@@ -460,7 +460,7 @@ case $choice in
 			echo Postfix is not installed on this machine!!
 			sleep 1
 			echo goodbye!!
-			exec 0
+			exec $0
 		fi
 	;;
 	2) 
@@ -485,7 +485,7 @@ case $choice in
 			echo Postfix is not installed on this machine!!
 			sleep 1
 			echo Goodbye!!
-			exec 0
+			exec $0
 		fi
 	;;
 	3)
@@ -513,7 +513,7 @@ case $choice in
 			else
 				echo Goodbye!!
 				clear
-				exec 0
+				exec $0
 			fi
 		else
 			echo "Postfix is not installed on this machine!!"
@@ -545,13 +545,13 @@ case $choice in
 			else
 				echo Goodbye!!
 				clear
-				exec 0
+				exec $0
 			fi
 		else
 			echo "Postfix in not installed on this machine!!"
 			sleep 1
 			echo "Goodbye"
-			exec 0
+			exec $0
 		fi
 	;;
 
@@ -581,13 +581,13 @@ case $choice in
 			else
 				echo Goodbye!!
 				clear
-				exec 0
+				exec $0
 			fi
 		else 
 			echo "Postfix is not installed on this machine"
 			sleep 1
 			echo "Goodbye"
-			exec 0
+			exec $0
 		fi
 	;;	
 			
@@ -616,13 +616,13 @@ case $choice in
 			else
 				echo Goodbye!!
 				clear
-				exec 0
+				exec $0
 			fi
 		else
 			echo "Postfix is not installed on this machine!!"
 			sleep 1
 			echo "Goodbye!!"
-			exec 0
+			exec $0
 		fi
 	;;
 	7)
@@ -657,15 +657,164 @@ case $choice in
 			else
 				echo Goodbye!!
 				clear
-				exec 0
+				exec $0
 			fi
 		else
 			echo "Postfix is not installed on this machine"
 			sleep 1
 			echo "Goodbye!!"
-			exec 0
+			exec $0
 		fi
 	;;	
+	8)
+		if [ -e /usr/sbin/postqueue ]
+		then
+			clear
+
+			echo -e "${BGreen}REMOVING MAILS BY MAIL ACCOUNT${Color_Off}"
+			echo
+
+			echo
+			echo
+			echo "What is the mail account eg: test@novum.co.ke"
+			read id
+			echo "Are you sure you want to ${BRed}remove${Color_Off} 
+			${BYellow}$id${Color_Off} from the Queue?
+			y/n"
+			read answer
+			if [ $answer == "y" ]
+			then
+				echo " mailq | tail +2 | awk 'BEGIN { RS = "" } / $id$/ { print $1 }' | tr -d '*!' | postsuper -d -"
+				sleep 2 &
+				PID=$!
+				i=1
+				sp="/-\|"
+				echo -n ' '
+				while [ -d /proc/$PID ]
+				do
+				printf "\b${sp:i++%${#sp}:1}"
+				done		
+				a=`mailq | tail +2 | awk "BEGIN { RS = "" } / $id$/ { print $1 }" | tr -d '*!' | postsuper -d -`
+			else
+				echo Goodbye!!
+				clear
+				exec $0
+			fi
+		else
+			echo "Postfix is not installed on this machine"
+			sleep 1
+			echo "Goodbye!!"
+			exec $0
+		fi
+
+	;;
+	9)
+		if [ -e /usr/sbin/postqueue ]
+		then
+			clear
+
+			echo -e "${BGreen}DISPLAY MAIL HEADERS AND CONTENTS OF MAIL${Color_Off}"
+			echo
+
+			echo
+			echo
+			echo "What is the mail ID eg: D89D45J56D"
+			read id
+				echo "running command postcat -q $id"
+				sleep 2 &
+				PID=$!
+				i=1
+				sp="/-\|"
+				echo -n ' '
+				while [ -d /proc/$PID ]
+				do
+				printf "\b${sp:i++%${#sp}:1}"
+				done		
+				postcat -q $id
+		else
+			echo "Postfix is not installed on this machine"
+			sleep 1
+			echo "Goodbye!!"
+			exec $0
+		fi
+
+	;;
+	10)
+		if [ -e /usr/sbin/postqueue ]
+		then
+			clear
+
+			echo -e "${BGreen}REATEMPT DELIVERY OF A PARTICULAR MAIL IN THE QUEUE${Color_Off}"
+			echo
+
+			echo
+			echo
+			echo "What is the mail ID eg: D89D45J56D"
+			read id
+				echo "running command postcat -i $id"
+				sleep 2 &
+				PID=$!
+				i=1
+				sp="/-\|"
+				echo -n ' '
+				while [ -d /proc/$PID ]
+				do
+				printf "\b${sp:i++%${#sp}:1}"
+				done		
+				postcat -i $id
+		else
+			echo "Postfix is not installed on this machine"
+			sleep 1
+			echo "Goodbye!!"
+			exec $0
+		fi
+	;;
+	11)
+		if [ -e /usr/sbin/postqueue ]
+		then
+			clear
+
+			echo -e "${BGreen}CLEAR INFECTED MAILS BY USER OR PATTERN${Color_Off}"
+			echo
+
+			echo
+			echo
+			echo "What is the pattern eg: (test.novum.co.ke or X-PHP-Originating-Script 48:badmailing.php) "
+			read pattern
+			echo "Are you sure you want to ${BRed}clear all ${Color_Off} 
+			${BYellow}$id${Color_Off} from the Queue?
+			y/n"
+			read answer
+			if [ $answer == "y" ]
+			then
+				echo "processing Querry..."
+				sleep 1
+										
+				echo "for id in 'postqueue -p | grep '^[A-Z0-9]' | cut -f1 -d' '|sed 's/*//g''; do postcat -q $id | grep $pattern && postsuper -d $id; done"
+				a=`for id in `postqueue -p | grep '^[A-Z0-9]' | cut -f1 -d' '|sed 's/*//g'`; do postcat -q $id | grep $pattern && postsuper -d $id; done`
+				sleep 2 &
+				PID=$!
+				i=1
+				sp="/-\|"
+				echo -n ' '
+				while [ -d /proc/$PID ]
+				do
+				printf "\b${sp:i++%${#sp}:1}"
+				done		
+				echo $a
+			else
+				echo Goodbye!!
+				clear
+				exec $0
+			fi
+		else
+			echo "Postfix is not installed on this machine"
+			sleep 1
+			echo "Goodbye!!"
+			exec $0
+		fi
+	;;
+	
 
 esac
 ;;
